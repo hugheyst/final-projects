@@ -1,0 +1,8 @@
+"route1.png" settings:
+- popSize = 100
+- cxpb = 0.8 (crossover probability)
+- mutpb = 0.15 (mutation prob)
+- ngen = 5000
+- tournsize = 4 (tournament selection)
+- path length = 18095.894 km
+- $12,095 for gas money @ $2.58/gal (nationwide avg) and 38.6 km/gal

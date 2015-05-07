@@ -1,0 +1,1414 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 10.0' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       158,          7]
+NotebookDataLength[     55882,       1405]
+NotebookOptionsPosition[     55212,       1378]
+NotebookOutlinePosition[     55548,       1393]
+CellTagsIndexPosition[     55505,       1390]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+
+Cell[CellGroupData[{
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{"BigCities", "=", 
+   RowBox[{"CountryData", "[", 
+    RowBox[{"\"\<UnitedStates\>\"", ",", "\"\<LargestCities\>\""}], "]"}]}], 
+  ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"Nsz", "=", "40"}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"BC", "=", 
+   RowBox[{"BigCities", "[", 
+    RowBox[{"[", 
+     RowBox[{"Range", "[", 
+      RowBox[{"1", ",", "Nsz"}], "]"}], "]"}], "]"}]}], 
+  ";"}], "\[IndentingNewLine]", 
+ RowBox[{"Cities", "=", 
+  RowBox[{"Table", "[", 
+   RowBox[{
+    RowBox[{"CityData", "[", 
+     RowBox[{
+      RowBox[{"BC", "[", 
+       RowBox[{"[", "i", "]"}], "]"}], ",", "\"\<FullName\>\""}], "]"}], ",", 
+    
+    RowBox[{"{", 
+     RowBox[{"i", ",", "1", ",", "Nsz"}], "}"}]}], 
+   "]"}]}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"LatLon", "=", 
+   RowBox[{"Table", "[", 
+    RowBox[{
+     RowBox[{"CityData", "[", 
+      RowBox[{
+       RowBox[{"BC", "[", 
+        RowBox[{"[", "i", "]"}], "]"}], ",", "\"\<Coordinates\>\""}], "]"}], 
+     ",", 
+     RowBox[{"{", 
+      RowBox[{"i", ",", "1", ",", "Nsz"}], "}"}]}], "]"}]}], 
+  "\[IndentingNewLine]", 
+  RowBox[{"(*", " ", 
+   RowBox[{"Write", " ", "cities", " ", "used", " ", "to", " ", 
+    RowBox[{"Cities", ".", "txt"}]}], " ", "*)"}]}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"Export", "[", 
+   RowBox[{
+   "\"\</home/hugheyst/Dropbox/SS15/PHY905/traveling_salesman/Cities.txt\>\"",
+     ",", "Cities", ",", "\"\<List\>\""}], "]"}], 
+  ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"DistanceMatrix", "=", 
+   RowBox[{"SparseArray", "[", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"Band", "[", 
+        RowBox[{"{", 
+         RowBox[{"1", ",", "1"}], "}"}], "]"}], "\[Rule]", "0"}], "}"}], ",", 
+     
+     RowBox[{"{", 
+      RowBox[{"Nsz", ",", "Nsz"}], "}"}]}], "]"}]}], 
+  ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"CityLocs", "=", 
+   RowBox[{
+    RowBox[{
+     RowBox[{"CityData", "[", 
+      RowBox[{"#", ",", "\"\<Coordinates\>\""}], "]"}], "&"}], "/@", "BC"}]}],
+   ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"address", "[", 
+    RowBox[{"i_", ",", "j_"}], "]"}], ":=", 
+   RowBox[{
+   "\"\<https://maps.googleapis.com/maps/api/distancematrix/json?origins=\>\"\
+", "<>", 
+    RowBox[{"ToString", "[", 
+     RowBox[{"CityLocs", "[", 
+      RowBox[{"[", 
+       RowBox[{"i", ",", "1"}], "]"}], "]"}], "]"}], "<>", "\"\<,\>\"", "<>", 
+    
+    RowBox[{"ToString", "[", 
+     RowBox[{"CityLocs", "[", 
+      RowBox[{"[", 
+       RowBox[{"i", ",", "2"}], "]"}], "]"}], "]"}], "<>", 
+    "\"\<&destinations=\>\"", "<>", 
+    RowBox[{"ToString", "[", 
+     RowBox[{"CityLocs", "[", 
+      RowBox[{"[", 
+       RowBox[{"j", ",", "1"}], "]"}], "]"}], "]"}], "<>", "\"\<,\>\"", "<>", 
+    
+    RowBox[{"ToString", "[", 
+     RowBox[{"CityLocs", "[", 
+      RowBox[{"[", 
+       RowBox[{"j", ",", "2"}], "]"}], "]"}], "]"}], "<>", 
+    "\"\<&sensor=false&key=AIzaSyC4wPphDz79Ed1cesPLHIlSf-QaOAxEtEU\>\""}]}], 
+  ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"Dist", "[", 
+    RowBox[{"i_", ",", "j_"}], "]"}], ":=", 
+   RowBox[{"OptionValue", "[", 
+    RowBox[{
+     RowBox[{"Import", "[", 
+      RowBox[{
+       RowBox[{"address", "[", 
+        RowBox[{"i", ",", "j"}], "]"}], ",", "\"\<JSON\>\""}], "]"}], ",", 
+     RowBox[{"\"\<rows\>\"", "\[Rule]", 
+      RowBox[{"\"\<elements\>\"", "\[Rule]", 
+       RowBox[{"\"\<distance\>\"", "\[Rule]", "\"\<value\>\""}]}]}]}], 
+    "]"}]}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"Duration", "[", 
+    RowBox[{"i_", ",", "j_"}], "]"}], ":=", 
+   RowBox[{"OptionValue", "[", 
+    RowBox[{
+     RowBox[{"Import", "[", 
+      RowBox[{
+       RowBox[{"address", "[", 
+        RowBox[{"i", ",", "j"}], "]"}], ",", "\"\<JSON\>\""}], "]"}], ",", 
+     RowBox[{"\"\<rows\>\"", "\[Rule]", 
+      RowBox[{"\"\<elements\>\"", "\[Rule]", 
+       RowBox[{"\"\<duration\>\"", "\[Rule]", "\"\<value\>\""}]}]}]}], 
+    "]"}]}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"Indices", "=", 
+   RowBox[{"Table", "[", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"i", ",", "j"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"i", ",", "1", ",", "Nsz"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"j", ",", 
+       RowBox[{"i", "+", "1"}], ",", "Nsz"}], "}"}]}], "]"}]}], 
+  ";"}]}], "Input",
+ CellChangeTimes->{{3.638268156212824*^9, 3.638268269634714*^9}, {
+   3.638268301602272*^9, 3.638268320193852*^9}, {3.638268350817617*^9, 
+   3.63826836023346*^9}, {3.63826842994137*^9, 3.638268443639656*^9}, {
+   3.63826883638734*^9, 3.638268874341255*^9}, {3.6382689610909977`*^9, 
+   3.638269069997994*^9}, {3.638269156744132*^9, 3.6382691664987793`*^9}, {
+   3.6382692318910837`*^9, 3.638269244704193*^9}, {3.638269302154911*^9, 
+   3.6382693441438828`*^9}, {3.6382693804349527`*^9, 3.638269476912183*^9}, {
+   3.638269518801655*^9, 3.638269578394122*^9}, {3.638269727203096*^9, 
+   3.638269982857717*^9}, {3.638270061996389*^9, 3.638270108601447*^9}, {
+   3.638270138984861*^9, 3.6382701528167543`*^9}, {3.6382702720980577`*^9, 
+   3.6382705589963512`*^9}, {3.6382707238142643`*^9, 3.638271070856866*^9}, {
+   3.638271250314342*^9, 3.638271344774879*^9}, {3.6382717721577*^9, 
+   3.638271901689597*^9}, {3.63827257499959*^9, 3.638272588816283*^9}, {
+   3.638272663815385*^9, 3.638272691000025*^9}, {3.6382731436781178`*^9, 
+   3.6382731572806892`*^9}, {3.638273323395218*^9, 3.638273480739596*^9}, {
+   3.638273787728614*^9, 3.638273788703842*^9}, {3.638273823733218*^9, 
+   3.638273931874136*^9}, {3.638276207869556*^9, 3.638276250396089*^9}, {
+   3.638276285919579*^9, 3.638276290570779*^9}, 3.638276376497583*^9, {
+   3.638806128905746*^9, 3.6388061550427713`*^9}, {3.638806302451118*^9, 
+   3.638806320264204*^9}, {3.638806356641374*^9, 3.6388063598730297`*^9}, {
+   3.638806389917742*^9, 3.6388063903961487`*^9}, {3.638806451479238*^9, 
+   3.638806537407175*^9}, {3.638806591947885*^9, 3.6388066773562593`*^9}, {
+   3.6388067095589314`*^9, 3.6388068241795073`*^9}, {3.638806855269191*^9, 
+   3.638806855766295*^9}, 3.6388069525331993`*^9, {3.638807118085103*^9, 
+   3.638807131165592*^9}, 3.638807661088732*^9, {3.6394935082374573`*^9, 
+   3.639493509531064*^9}, {3.6394935798110323`*^9, 3.639493581135931*^9}, {
+   3.639493654704378*^9, 3.639493660382452*^9}, {3.6394940036800137`*^9, 
+   3.639494005293606*^9}, {3.639494268887546*^9, 3.639494269481674*^9}, {
+   3.639494330520954*^9, 3.639494330827291*^9}, {3.639494397758938*^9, 
+   3.639494399173987*^9}, {3.6395011982882633`*^9, 3.6395011991867723`*^9}, {
+   3.639513126474571*^9, 3.639513153909985*^9}}],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{"\<\"New York City, New York\"\>", 
+   ",", "\<\"Los Angeles, California\"\>", ",", "\<\"Chicago, Illinois\"\>", 
+   ",", "\<\"Houston, Texas\"\>", ",", "\<\"Philadelphia, Pennsylvania\"\>", 
+   ",", "\<\"Phoenix, Arizona\"\>", ",", "\<\"San Antonio, Texas\"\>", 
+   ",", "\<\"San Diego, California\"\>", ",", "\<\"Dallas, Texas\"\>", 
+   ",", "\<\"San Jose, California\"\>", ",", "\<\"Indianapolis, Indiana\"\>", 
+   ",", "\<\"Jacksonville, Florida\"\>", 
+   ",", "\<\"San Francisco, California\"\>", ",", "\<\"Austin, Texas\"\>", 
+   ",", "\<\"Columbus, Ohio\"\>", ",", "\<\"Fort Worth, Texas\"\>", 
+   ",", "\<\"Charlotte, North Carolina\"\>", ",", "\<\"Detroit, Michigan\"\>",
+    ",", "\<\"El Paso, Texas\"\>", ",", "\<\"Memphis, Tennessee\"\>", 
+   ",", "\<\"Nashville, Tennessee\"\>", ",", "\<\"Baltimore, Maryland\"\>", 
+   ",", "\<\"Boston, Massachusetts\"\>", ",", "\<\"Seattle, Washington\"\>", 
+   ",", "\<\"Washington, District of Columbia\"\>", 
+   ",", "\<\"Denver, Colorado\"\>", ",", "\<\"Milwaukee, Wisconsin\"\>", 
+   ",", "\<\"Portland, Oregon\"\>", ",", "\<\"Las Vegas, Nevada\"\>", 
+   ",", "\<\"Oklahoma City, Oklahoma\"\>", 
+   ",", "\<\"Albuquerque, New Mexico\"\>", ",", "\<\"Tucson, Arizona\"\>", 
+   ",", "\<\"Fresno, California\"\>", ",", "\<\"Sacramento, California\"\>", 
+   ",", "\<\"Long Beach, California\"\>", 
+   ",", "\<\"Kansas City, Missouri\"\>", ",", "\<\"Mesa, Arizona\"\>", 
+   ",", "\<\"Virginia Beach, Virginia\"\>", ",", "\<\"Atlanta, Georgia\"\>", 
+   ",", "\<\"Colorado Springs, Colorado\"\>"}], "}"}]], "Output",
+ CellChangeTimes->{
+  3.6394942342156467`*^9, 3.6394942719000683`*^9, 3.63949433209464*^9, 
+   3.639494407619026*^9, {3.6395012186589518`*^9, 3.639501247181929*^9}, 
+   3.63951315738043*^9, 3.6395132438380117`*^9, 3.639513297546826*^9}],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{
+   RowBox[{"{", 
+    RowBox[{"40.6642738`", ",", 
+     RowBox[{"-", "73.9385004`"}]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"34.0193936`", ",", 
+     RowBox[{"-", "118.4108248`"}]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"41.8375511`", ",", 
+     RowBox[{"-", "87.6818441`"}]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"29.7804724`", ",", 
+     RowBox[{"-", "95.3863425`"}]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"40.0093755`", ",", 
+     RowBox[{"-", "75.1333459`"}]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"33.5721625`", ",", 
+     RowBox[{"-", "112.0879662`"}]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"29.4724026`", ",", 
+     RowBox[{"-", "98.5251419`"}]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"32.8152995`", ",", 
+     RowBox[{"-", "117.134993`"}]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"32.794176`", ",", 
+     RowBox[{"-", "96.7655033`"}]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"37.2968672`", ",", 
+     RowBox[{"-", "121.8193058`"}]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"39.7779954`", ",", 
+     RowBox[{"-", "86.1458378`"}]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"30.3370193`", ",", 
+     RowBox[{"-", "81.6613021`"}]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"37.759881`", ",", 
+     RowBox[{"-", "122.437392`"}]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"30.3071816`", ",", 
+     RowBox[{"-", "97.7559964`"}]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"39.9847989`", ",", 
+     RowBox[{"-", "82.9850438`"}]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"32.7795423`", ",", 
+     RowBox[{"-", "97.3463354`"}]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"35.2087069`", ",", 
+     RowBox[{"-", "80.8307389`"}]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"42.3830375`", ",", 
+     RowBox[{"-", "83.1022365`"}]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"31.8483598`", ",", 
+     RowBox[{"-", "106.426979`"}]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"35.1035431`", ",", 
+     RowBox[{"-", "89.9784984`"}]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"36.1691287`", ",", 
+     RowBox[{"-", "86.7847898`"}]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"39.3002135`", ",", 
+     RowBox[{"-", "76.6105159`"}]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"42.33196`", ",", 
+     RowBox[{"-", "71.0201725`"}]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"47.6204993`", ",", 
+     RowBox[{"-", "122.3508761`"}]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"38.9041485`", ",", 
+     RowBox[{"-", "77.0170942`"}]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"39.7618487`", ",", 
+     RowBox[{"-", "104.8806251`"}]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"43.0633484`", ",", 
+     RowBox[{"-", "87.9666952`"}]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"45.5369506`", ",", 
+     RowBox[{"-", "122.649971`"}]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"36.2277116`", ",", 
+     RowBox[{"-", "115.2640448`"}]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"35.4670795`", ",", 
+     RowBox[{"-", "97.5136565`"}]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"35.1055517`", ",", 
+     RowBox[{"-", "106.6473884`"}]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"32.1542888`", ",", 
+     RowBox[{"-", "110.8710622`"}]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"36.7826736`", ",", 
+     RowBox[{"-", "119.794492`"}]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"38.5665924`", ",", 
+     RowBox[{"-", "121.4686318`"}]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"33.8091018`", ",", 
+     RowBox[{"-", "118.1553273`"}]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"39.125212`", ",", 
+     RowBox[{"-", "94.5511362`"}]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"33.4019259`", ",", 
+     RowBox[{"-", "111.7173787`"}]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"36.7793219`", ",", 
+     RowBox[{"-", "76.0240202`"}]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"33.7629088`", ",", 
+     RowBox[{"-", "84.4226745`"}]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"38.8672553`", ",", 
+     RowBox[{"-", "104.760749`"}]}], "}"}]}], "}"}]], "Output",
+ CellChangeTimes->{
+  3.6394942342156467`*^9, 3.6394942719000683`*^9, 3.63949433209464*^9, 
+   3.639494407619026*^9, {3.6395012186589518`*^9, 3.639501247181929*^9}, 
+   3.63951315738043*^9, 3.6395132438380117`*^9, 3.639513297582562*^9}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"Indices", "//", "TableForm"}]], "Input",
+ CellChangeTimes->{{3.6382763893052797`*^9, 3.638276391919354*^9}}],
+
+Cell[BoxData[
+ InterpretationBox[GridBox[{
+    {GridBox[{
+       {"1"},
+       {"2"}
+      },
+      GridBoxAlignment->{
+       "Columns" -> {{Left}}, "ColumnsIndexed" -> {}, "Rows" -> {{Baseline}}, 
+        "RowsIndexed" -> {}},
+      GridBoxSpacings->{"Columns" -> {
+          Offset[0.27999999999999997`], {
+           Offset[0.7]}, 
+          Offset[0.27999999999999997`]}, "ColumnsIndexed" -> {}, "Rows" -> {
+          Offset[0.2], {
+           Offset[0.1]}, 
+          Offset[0.2]}, "RowsIndexed" -> {}}], GridBox[{
+       {"1"},
+       {"3"}
+      },
+      GridBoxAlignment->{
+       "Columns" -> {{Left}}, "ColumnsIndexed" -> {}, "Rows" -> {{Baseline}}, 
+        "RowsIndexed" -> {}},
+      GridBoxSpacings->{"Columns" -> {
+          Offset[0.27999999999999997`], {
+           Offset[0.7]}, 
+          Offset[0.27999999999999997`]}, "ColumnsIndexed" -> {}, "Rows" -> {
+          Offset[0.2], {
+           Offset[0.1]}, 
+          Offset[0.2]}, "RowsIndexed" -> {}}], GridBox[{
+       {"1"},
+       {"4"}
+      },
+      GridBoxAlignment->{
+       "Columns" -> {{Left}}, "ColumnsIndexed" -> {}, "Rows" -> {{Baseline}}, 
+        "RowsIndexed" -> {}},
+      GridBoxSpacings->{"Columns" -> {
+          Offset[0.27999999999999997`], {
+           Offset[0.7]}, 
+          Offset[0.27999999999999997`]}, "ColumnsIndexed" -> {}, "Rows" -> {
+          Offset[0.2], {
+           Offset[0.1]}, 
+          Offset[0.2]}, "RowsIndexed" -> {}}], GridBox[{
+       {"1"},
+       {"5"}
+      },
+      GridBoxAlignment->{
+       "Columns" -> {{Left}}, "ColumnsIndexed" -> {}, "Rows" -> {{Baseline}}, 
+        "RowsIndexed" -> {}},
+      GridBoxSpacings->{"Columns" -> {
+          Offset[0.27999999999999997`], {
+           Offset[0.7]}, 
+          Offset[0.27999999999999997`]}, "ColumnsIndexed" -> {}, "Rows" -> {
+          Offset[0.2], {
+           Offset[0.1]}, 
+          Offset[0.2]}, "RowsIndexed" -> {}}], GridBox[{
+       {"1"},
+       {"6"}
+      },
+      GridBoxAlignment->{
+       "Columns" -> {{Left}}, "ColumnsIndexed" -> {}, "Rows" -> {{Baseline}}, 
+        "RowsIndexed" -> {}},
+      GridBoxSpacings->{"Columns" -> {
+          Offset[0.27999999999999997`], {
+           Offset[0.7]}, 
+          Offset[0.27999999999999997`]}, "ColumnsIndexed" -> {}, "Rows" -> {
+          Offset[0.2], {
+           Offset[0.1]}, 
+          Offset[0.2]}, "RowsIndexed" -> {}}], GridBox[{
+       {"1"},
+       {"7"}
+      },
+      GridBoxAlignment->{
+       "Columns" -> {{Left}}, "ColumnsIndexed" -> {}, "Rows" -> {{Baseline}}, 
+        "RowsIndexed" -> {}},
+      GridBoxSpacings->{"Columns" -> {
+          Offset[0.27999999999999997`], {
+           Offset[0.7]}, 
+          Offset[0.27999999999999997`]}, "ColumnsIndexed" -> {}, "Rows" -> {
+          Offset[0.2], {
+           Offset[0.1]}, 
+          Offset[0.2]}, "RowsIndexed" -> {}}], GridBox[{
+       {"1"},
+       {"8"}
+      },
+      GridBoxAlignment->{
+       "Columns" -> {{Left}}, "ColumnsIndexed" -> {}, "Rows" -> {{Baseline}}, 
+        "RowsIndexed" -> {}},
+      GridBoxSpacings->{"Columns" -> {
+          Offset[0.27999999999999997`], {
+           Offset[0.7]}, 
+          Offset[0.27999999999999997`]}, "ColumnsIndexed" -> {}, "Rows" -> {
+          Offset[0.2], {
+           Offset[0.1]}, 
+          Offset[0.2]}, "RowsIndexed" -> {}}], GridBox[{
+       {"1"},
+       {"9"}
+      },
+      GridBoxAlignment->{
+       "Columns" -> {{Left}}, "ColumnsIndexed" -> {}, "Rows" -> {{Baseline}}, 
+        "RowsIndexed" -> {}},
+      GridBoxSpacings->{"Columns" -> {
+          Offset[0.27999999999999997`], {
+           Offset[0.7]}, 
+          Offset[0.27999999999999997`]}, "ColumnsIndexed" -> {}, "Rows" -> {
+          Offset[0.2], {
+           Offset[0.1]}, 
+          Offset[0.2]}, "RowsIndexed" -> {}}], GridBox[{
+       {"1"},
+       {"10"}
+      },
+      GridBoxAlignment->{
+       "Columns" -> {{Left}}, "ColumnsIndexed" -> {}, "Rows" -> {{Baseline}}, 
+        "RowsIndexed" -> {}},
+      GridBoxSpacings->{"Columns" -> {
+          Offset[0.27999999999999997`], {
+           Offset[0.7]}, 
+          Offset[0.27999999999999997`]}, "ColumnsIndexed" -> {}, "Rows" -> {
+          Offset[0.2], {
+           Offset[0.1]}, 
+          Offset[0.2]}, "RowsIndexed" -> {}}]},
+    {GridBox[{
+       {"2"},
+       {"3"}
+      },
+      GridBoxAlignment->{
+       "Columns" -> {{Left}}, "ColumnsIndexed" -> {}, "Rows" -> {{Baseline}}, 
+        "RowsIndexed" -> {}},
+      GridBoxSpacings->{"Columns" -> {
+          Offset[0.27999999999999997`], {
+           Offset[0.7]}, 
+          Offset[0.27999999999999997`]}, "ColumnsIndexed" -> {}, "Rows" -> {
+          Offset[0.2], {
+           Offset[0.1]}, 
+          Offset[0.2]}, "RowsIndexed" -> {}}], GridBox[{
+       {"2"},
+       {"4"}
+      },
+      GridBoxAlignment->{
+       "Columns" -> {{Left}}, "ColumnsIndexed" -> {}, "Rows" -> {{Baseline}}, 
+        "RowsIndexed" -> {}},
+      GridBoxSpacings->{"Columns" -> {
+          Offset[0.27999999999999997`], {
+           Offset[0.7]}, 
+          Offset[0.27999999999999997`]}, "ColumnsIndexed" -> {}, "Rows" -> {
+          Offset[0.2], {
+           Offset[0.1]}, 
+          Offset[0.2]}, "RowsIndexed" -> {}}], GridBox[{
+       {"2"},
+       {"5"}
+      },
+      GridBoxAlignment->{
+       "Columns" -> {{Left}}, "ColumnsIndexed" -> {}, "Rows" -> {{Baseline}}, 
+        "RowsIndexed" -> {}},
+      GridBoxSpacings->{"Columns" -> {
+          Offset[0.27999999999999997`], {
+           Offset[0.7]}, 
+          Offset[0.27999999999999997`]}, "ColumnsIndexed" -> {}, "Rows" -> {
+          Offset[0.2], {
+           Offset[0.1]}, 
+          Offset[0.2]}, "RowsIndexed" -> {}}], GridBox[{
+       {"2"},
+       {"6"}
+      },
+      GridBoxAlignment->{
+       "Columns" -> {{Left}}, "ColumnsIndexed" -> {}, "Rows" -> {{Baseline}}, 
+        "RowsIndexed" -> {}},
+      GridBoxSpacings->{"Columns" -> {
+          Offset[0.27999999999999997`], {
+           Offset[0.7]}, 
+          Offset[0.27999999999999997`]}, "ColumnsIndexed" -> {}, "Rows" -> {
+          Offset[0.2], {
+           Offset[0.1]}, 
+          Offset[0.2]}, "RowsIndexed" -> {}}], GridBox[{
+       {"2"},
+       {"7"}
+      },
+      GridBoxAlignment->{
+       "Columns" -> {{Left}}, "ColumnsIndexed" -> {}, "Rows" -> {{Baseline}}, 
+        "RowsIndexed" -> {}},
+      GridBoxSpacings->{"Columns" -> {
+          Offset[0.27999999999999997`], {
+           Offset[0.7]}, 
+          Offset[0.27999999999999997`]}, "ColumnsIndexed" -> {}, "Rows" -> {
+          Offset[0.2], {
+           Offset[0.1]}, 
+          Offset[0.2]}, "RowsIndexed" -> {}}], GridBox[{
+       {"2"},
+       {"8"}
+      },
+      GridBoxAlignment->{
+       "Columns" -> {{Left}}, "ColumnsIndexed" -> {}, "Rows" -> {{Baseline}}, 
+        "RowsIndexed" -> {}},
+      GridBoxSpacings->{"Columns" -> {
+          Offset[0.27999999999999997`], {
+           Offset[0.7]}, 
+          Offset[0.27999999999999997`]}, "ColumnsIndexed" -> {}, "Rows" -> {
+          Offset[0.2], {
+           Offset[0.1]}, 
+          Offset[0.2]}, "RowsIndexed" -> {}}], GridBox[{
+       {"2"},
+       {"9"}
+      },
+      GridBoxAlignment->{
+       "Columns" -> {{Left}}, "ColumnsIndexed" -> {}, "Rows" -> {{Baseline}}, 
+        "RowsIndexed" -> {}},
+      GridBoxSpacings->{"Columns" -> {
+          Offset[0.27999999999999997`], {
+           Offset[0.7]}, 
+          Offset[0.27999999999999997`]}, "ColumnsIndexed" -> {}, "Rows" -> {
+          Offset[0.2], {
+           Offset[0.1]}, 
+          Offset[0.2]}, "RowsIndexed" -> {}}], GridBox[{
+       {"2"},
+       {"10"}
+      },
+      GridBoxAlignment->{
+       "Columns" -> {{Left}}, "ColumnsIndexed" -> {}, "Rows" -> {{Baseline}}, 
+        "RowsIndexed" -> {}},
+      GridBoxSpacings->{"Columns" -> {
+          Offset[0.27999999999999997`], {
+           Offset[0.7]}, 
+          Offset[0.27999999999999997`]}, "ColumnsIndexed" -> {}, "Rows" -> {
+          Offset[0.2], {
+           Offset[0.1]}, 
+          Offset[0.2]}, "RowsIndexed" -> {}}], "\<\"\"\>"},
+    {GridBox[{
+       {"3"},
+       {"4"}
+      },
+      GridBoxAlignment->{
+       "Columns" -> {{Left}}, "ColumnsIndexed" -> {}, "Rows" -> {{Baseline}}, 
+        "RowsIndexed" -> {}},
+      GridBoxSpacings->{"Columns" -> {
+          Offset[0.27999999999999997`], {
+           Offset[0.7]}, 
+          Offset[0.27999999999999997`]}, "ColumnsIndexed" -> {}, "Rows" -> {
+          Offset[0.2], {
+           Offset[0.1]}, 
+          Offset[0.2]}, "RowsIndexed" -> {}}], GridBox[{
+       {"3"},
+       {"5"}
+      },
+      GridBoxAlignment->{
+       "Columns" -> {{Left}}, "ColumnsIndexed" -> {}, "Rows" -> {{Baseline}}, 
+        "RowsIndexed" -> {}},
+      GridBoxSpacings->{"Columns" -> {
+          Offset[0.27999999999999997`], {
+           Offset[0.7]}, 
+          Offset[0.27999999999999997`]}, "ColumnsIndexed" -> {}, "Rows" -> {
+          Offset[0.2], {
+           Offset[0.1]}, 
+          Offset[0.2]}, "RowsIndexed" -> {}}], GridBox[{
+       {"3"},
+       {"6"}
+      },
+      GridBoxAlignment->{
+       "Columns" -> {{Left}}, "ColumnsIndexed" -> {}, "Rows" -> {{Baseline}}, 
+        "RowsIndexed" -> {}},
+      GridBoxSpacings->{"Columns" -> {
+          Offset[0.27999999999999997`], {
+           Offset[0.7]}, 
+          Offset[0.27999999999999997`]}, "ColumnsIndexed" -> {}, "Rows" -> {
+          Offset[0.2], {
+           Offset[0.1]}, 
+          Offset[0.2]}, "RowsIndexed" -> {}}], GridBox[{
+       {"3"},
+       {"7"}
+      },
+      GridBoxAlignment->{
+       "Columns" -> {{Left}}, "ColumnsIndexed" -> {}, "Rows" -> {{Baseline}}, 
+        "RowsIndexed" -> {}},
+      GridBoxSpacings->{"Columns" -> {
+          Offset[0.27999999999999997`], {
+           Offset[0.7]}, 
+          Offset[0.27999999999999997`]}, "ColumnsIndexed" -> {}, "Rows" -> {
+          Offset[0.2], {
+           Offset[0.1]}, 
+          Offset[0.2]}, "RowsIndexed" -> {}}], GridBox[{
+       {"3"},
+       {"8"}
+      },
+      GridBoxAlignment->{
+       "Columns" -> {{Left}}, "ColumnsIndexed" -> {}, "Rows" -> {{Baseline}}, 
+        "RowsIndexed" -> {}},
+      GridBoxSpacings->{"Columns" -> {
+          Offset[0.27999999999999997`], {
+           Offset[0.7]}, 
+          Offset[0.27999999999999997`]}, "ColumnsIndexed" -> {}, "Rows" -> {
+          Offset[0.2], {
+           Offset[0.1]}, 
+          Offset[0.2]}, "RowsIndexed" -> {}}], GridBox[{
+       {"3"},
+       {"9"}
+      },
+      GridBoxAlignment->{
+       "Columns" -> {{Left}}, "ColumnsIndexed" -> {}, "Rows" -> {{Baseline}}, 
+        "RowsIndexed" -> {}},
+      GridBoxSpacings->{"Columns" -> {
+          Offset[0.27999999999999997`], {
+           Offset[0.7]}, 
+          Offset[0.27999999999999997`]}, "ColumnsIndexed" -> {}, "Rows" -> {
+          Offset[0.2], {
+           Offset[0.1]}, 
+          Offset[0.2]}, "RowsIndexed" -> {}}], GridBox[{
+       {"3"},
+       {"10"}
+      },
+      GridBoxAlignment->{
+       "Columns" -> {{Left}}, "ColumnsIndexed" -> {}, "Rows" -> {{Baseline}}, 
+        "RowsIndexed" -> {}},
+      GridBoxSpacings->{"Columns" -> {
+          Offset[0.27999999999999997`], {
+           Offset[0.7]}, 
+          Offset[0.27999999999999997`]}, "ColumnsIndexed" -> {}, "Rows" -> {
+          Offset[0.2], {
+           Offset[0.1]}, 
+          Offset[0.2]}, "RowsIndexed" -> {}}], "\<\"\"\>", "\<\"\"\>"},
+    {GridBox[{
+       {"4"},
+       {"5"}
+      },
+      GridBoxAlignment->{
+       "Columns" -> {{Left}}, "ColumnsIndexed" -> {}, "Rows" -> {{Baseline}}, 
+        "RowsIndexed" -> {}},
+      GridBoxSpacings->{"Columns" -> {
+          Offset[0.27999999999999997`], {
+           Offset[0.7]}, 
+          Offset[0.27999999999999997`]}, "ColumnsIndexed" -> {}, "Rows" -> {
+          Offset[0.2], {
+           Offset[0.1]}, 
+          Offset[0.2]}, "RowsIndexed" -> {}}], GridBox[{
+       {"4"},
+       {"6"}
+      },
+      GridBoxAlignment->{
+       "Columns" -> {{Left}}, "ColumnsIndexed" -> {}, "Rows" -> {{Baseline}}, 
+        "RowsIndexed" -> {}},
+      GridBoxSpacings->{"Columns" -> {
+          Offset[0.27999999999999997`], {
+           Offset[0.7]}, 
+          Offset[0.27999999999999997`]}, "ColumnsIndexed" -> {}, "Rows" -> {
+          Offset[0.2], {
+           Offset[0.1]}, 
+          Offset[0.2]}, "RowsIndexed" -> {}}], GridBox[{
+       {"4"},
+       {"7"}
+      },
+      GridBoxAlignment->{
+       "Columns" -> {{Left}}, "ColumnsIndexed" -> {}, "Rows" -> {{Baseline}}, 
+        "RowsIndexed" -> {}},
+      GridBoxSpacings->{"Columns" -> {
+          Offset[0.27999999999999997`], {
+           Offset[0.7]}, 
+          Offset[0.27999999999999997`]}, "ColumnsIndexed" -> {}, "Rows" -> {
+          Offset[0.2], {
+           Offset[0.1]}, 
+          Offset[0.2]}, "RowsIndexed" -> {}}], GridBox[{
+       {"4"},
+       {"8"}
+      },
+      GridBoxAlignment->{
+       "Columns" -> {{Left}}, "ColumnsIndexed" -> {}, "Rows" -> {{Baseline}}, 
+        "RowsIndexed" -> {}},
+      GridBoxSpacings->{"Columns" -> {
+          Offset[0.27999999999999997`], {
+           Offset[0.7]}, 
+          Offset[0.27999999999999997`]}, "ColumnsIndexed" -> {}, "Rows" -> {
+          Offset[0.2], {
+           Offset[0.1]}, 
+          Offset[0.2]}, "RowsIndexed" -> {}}], GridBox[{
+       {"4"},
+       {"9"}
+      },
+      GridBoxAlignment->{
+       "Columns" -> {{Left}}, "ColumnsIndexed" -> {}, "Rows" -> {{Baseline}}, 
+        "RowsIndexed" -> {}},
+      GridBoxSpacings->{"Columns" -> {
+          Offset[0.27999999999999997`], {
+           Offset[0.7]}, 
+          Offset[0.27999999999999997`]}, "ColumnsIndexed" -> {}, "Rows" -> {
+          Offset[0.2], {
+           Offset[0.1]}, 
+          Offset[0.2]}, "RowsIndexed" -> {}}], GridBox[{
+       {"4"},
+       {"10"}
+      },
+      GridBoxAlignment->{
+       "Columns" -> {{Left}}, "ColumnsIndexed" -> {}, "Rows" -> {{Baseline}}, 
+        "RowsIndexed" -> {}},
+      GridBoxSpacings->{"Columns" -> {
+          Offset[0.27999999999999997`], {
+           Offset[0.7]}, 
+          Offset[0.27999999999999997`]}, "ColumnsIndexed" -> {}, "Rows" -> {
+          Offset[0.2], {
+           Offset[0.1]}, 
+          Offset[0.2]}, 
+        "RowsIndexed" -> {}}], "\<\"\"\>", "\<\"\"\>", "\<\"\"\>"},
+    {GridBox[{
+       {"5"},
+       {"6"}
+      },
+      GridBoxAlignment->{
+       "Columns" -> {{Left}}, "ColumnsIndexed" -> {}, "Rows" -> {{Baseline}}, 
+        "RowsIndexed" -> {}},
+      GridBoxSpacings->{"Columns" -> {
+          Offset[0.27999999999999997`], {
+           Offset[0.7]}, 
+          Offset[0.27999999999999997`]}, "ColumnsIndexed" -> {}, "Rows" -> {
+          Offset[0.2], {
+           Offset[0.1]}, 
+          Offset[0.2]}, "RowsIndexed" -> {}}], GridBox[{
+       {"5"},
+       {"7"}
+      },
+      GridBoxAlignment->{
+       "Columns" -> {{Left}}, "ColumnsIndexed" -> {}, "Rows" -> {{Baseline}}, 
+        "RowsIndexed" -> {}},
+      GridBoxSpacings->{"Columns" -> {
+          Offset[0.27999999999999997`], {
+           Offset[0.7]}, 
+          Offset[0.27999999999999997`]}, "ColumnsIndexed" -> {}, "Rows" -> {
+          Offset[0.2], {
+           Offset[0.1]}, 
+          Offset[0.2]}, "RowsIndexed" -> {}}], GridBox[{
+       {"5"},
+       {"8"}
+      },
+      GridBoxAlignment->{
+       "Columns" -> {{Left}}, "ColumnsIndexed" -> {}, "Rows" -> {{Baseline}}, 
+        "RowsIndexed" -> {}},
+      GridBoxSpacings->{"Columns" -> {
+          Offset[0.27999999999999997`], {
+           Offset[0.7]}, 
+          Offset[0.27999999999999997`]}, "ColumnsIndexed" -> {}, "Rows" -> {
+          Offset[0.2], {
+           Offset[0.1]}, 
+          Offset[0.2]}, "RowsIndexed" -> {}}], GridBox[{
+       {"5"},
+       {"9"}
+      },
+      GridBoxAlignment->{
+       "Columns" -> {{Left}}, "ColumnsIndexed" -> {}, "Rows" -> {{Baseline}}, 
+        "RowsIndexed" -> {}},
+      GridBoxSpacings->{"Columns" -> {
+          Offset[0.27999999999999997`], {
+           Offset[0.7]}, 
+          Offset[0.27999999999999997`]}, "ColumnsIndexed" -> {}, "Rows" -> {
+          Offset[0.2], {
+           Offset[0.1]}, 
+          Offset[0.2]}, "RowsIndexed" -> {}}], GridBox[{
+       {"5"},
+       {"10"}
+      },
+      GridBoxAlignment->{
+       "Columns" -> {{Left}}, "ColumnsIndexed" -> {}, "Rows" -> {{Baseline}}, 
+        "RowsIndexed" -> {}},
+      GridBoxSpacings->{"Columns" -> {
+          Offset[0.27999999999999997`], {
+           Offset[0.7]}, 
+          Offset[0.27999999999999997`]}, "ColumnsIndexed" -> {}, "Rows" -> {
+          Offset[0.2], {
+           Offset[0.1]}, 
+          Offset[0.2]}, 
+        "RowsIndexed" -> {}}], "\<\"\"\>", "\<\"\"\>", "\<\"\"\>", "\<\"\"\>"},
+    {GridBox[{
+       {"6"},
+       {"7"}
+      },
+      GridBoxAlignment->{
+       "Columns" -> {{Left}}, "ColumnsIndexed" -> {}, "Rows" -> {{Baseline}}, 
+        "RowsIndexed" -> {}},
+      GridBoxSpacings->{"Columns" -> {
+          Offset[0.27999999999999997`], {
+           Offset[0.7]}, 
+          Offset[0.27999999999999997`]}, "ColumnsIndexed" -> {}, "Rows" -> {
+          Offset[0.2], {
+           Offset[0.1]}, 
+          Offset[0.2]}, "RowsIndexed" -> {}}], GridBox[{
+       {"6"},
+       {"8"}
+      },
+      GridBoxAlignment->{
+       "Columns" -> {{Left}}, "ColumnsIndexed" -> {}, "Rows" -> {{Baseline}}, 
+        "RowsIndexed" -> {}},
+      GridBoxSpacings->{"Columns" -> {
+          Offset[0.27999999999999997`], {
+           Offset[0.7]}, 
+          Offset[0.27999999999999997`]}, "ColumnsIndexed" -> {}, "Rows" -> {
+          Offset[0.2], {
+           Offset[0.1]}, 
+          Offset[0.2]}, "RowsIndexed" -> {}}], GridBox[{
+       {"6"},
+       {"9"}
+      },
+      GridBoxAlignment->{
+       "Columns" -> {{Left}}, "ColumnsIndexed" -> {}, "Rows" -> {{Baseline}}, 
+        "RowsIndexed" -> {}},
+      GridBoxSpacings->{"Columns" -> {
+          Offset[0.27999999999999997`], {
+           Offset[0.7]}, 
+          Offset[0.27999999999999997`]}, "ColumnsIndexed" -> {}, "Rows" -> {
+          Offset[0.2], {
+           Offset[0.1]}, 
+          Offset[0.2]}, "RowsIndexed" -> {}}], GridBox[{
+       {"6"},
+       {"10"}
+      },
+      GridBoxAlignment->{
+       "Columns" -> {{Left}}, "ColumnsIndexed" -> {}, "Rows" -> {{Baseline}}, 
+        "RowsIndexed" -> {}},
+      GridBoxSpacings->{"Columns" -> {
+          Offset[0.27999999999999997`], {
+           Offset[0.7]}, 
+          Offset[0.27999999999999997`]}, "ColumnsIndexed" -> {}, "Rows" -> {
+          Offset[0.2], {
+           Offset[0.1]}, 
+          Offset[0.2]}, 
+        "RowsIndexed" -> {}}], "\<\"\"\>", "\<\"\"\>", "\<\"\"\>", \
+"\<\"\"\>", "\<\"\"\>"},
+    {GridBox[{
+       {"7"},
+       {"8"}
+      },
+      GridBoxAlignment->{
+       "Columns" -> {{Left}}, "ColumnsIndexed" -> {}, "Rows" -> {{Baseline}}, 
+        "RowsIndexed" -> {}},
+      GridBoxSpacings->{"Columns" -> {
+          Offset[0.27999999999999997`], {
+           Offset[0.7]}, 
+          Offset[0.27999999999999997`]}, "ColumnsIndexed" -> {}, "Rows" -> {
+          Offset[0.2], {
+           Offset[0.1]}, 
+          Offset[0.2]}, "RowsIndexed" -> {}}], GridBox[{
+       {"7"},
+       {"9"}
+      },
+      GridBoxAlignment->{
+       "Columns" -> {{Left}}, "ColumnsIndexed" -> {}, "Rows" -> {{Baseline}}, 
+        "RowsIndexed" -> {}},
+      GridBoxSpacings->{"Columns" -> {
+          Offset[0.27999999999999997`], {
+           Offset[0.7]}, 
+          Offset[0.27999999999999997`]}, "ColumnsIndexed" -> {}, "Rows" -> {
+          Offset[0.2], {
+           Offset[0.1]}, 
+          Offset[0.2]}, "RowsIndexed" -> {}}], GridBox[{
+       {"7"},
+       {"10"}
+      },
+      GridBoxAlignment->{
+       "Columns" -> {{Left}}, "ColumnsIndexed" -> {}, "Rows" -> {{Baseline}}, 
+        "RowsIndexed" -> {}},
+      GridBoxSpacings->{"Columns" -> {
+          Offset[0.27999999999999997`], {
+           Offset[0.7]}, 
+          Offset[0.27999999999999997`]}, "ColumnsIndexed" -> {}, "Rows" -> {
+          Offset[0.2], {
+           Offset[0.1]}, 
+          Offset[0.2]}, 
+        "RowsIndexed" -> {}}], "\<\"\"\>", "\<\"\"\>", "\<\"\"\>", \
+"\<\"\"\>", "\<\"\"\>", "\<\"\"\>"},
+    {GridBox[{
+       {"8"},
+       {"9"}
+      },
+      GridBoxAlignment->{
+       "Columns" -> {{Left}}, "ColumnsIndexed" -> {}, "Rows" -> {{Baseline}}, 
+        "RowsIndexed" -> {}},
+      GridBoxSpacings->{"Columns" -> {
+          Offset[0.27999999999999997`], {
+           Offset[0.7]}, 
+          Offset[0.27999999999999997`]}, "ColumnsIndexed" -> {}, "Rows" -> {
+          Offset[0.2], {
+           Offset[0.1]}, 
+          Offset[0.2]}, "RowsIndexed" -> {}}], GridBox[{
+       {"8"},
+       {"10"}
+      },
+      GridBoxAlignment->{
+       "Columns" -> {{Left}}, "ColumnsIndexed" -> {}, "Rows" -> {{Baseline}}, 
+        "RowsIndexed" -> {}},
+      GridBoxSpacings->{"Columns" -> {
+          Offset[0.27999999999999997`], {
+           Offset[0.7]}, 
+          Offset[0.27999999999999997`]}, "ColumnsIndexed" -> {}, "Rows" -> {
+          Offset[0.2], {
+           Offset[0.1]}, 
+          Offset[0.2]}, 
+        "RowsIndexed" -> {}}], "\<\"\"\>", "\<\"\"\>", "\<\"\"\>", \
+"\<\"\"\>", "\<\"\"\>", "\<\"\"\>", "\<\"\"\>"},
+    {GridBox[{
+       {"9"},
+       {"10"}
+      },
+      GridBoxAlignment->{
+       "Columns" -> {{Left}}, "ColumnsIndexed" -> {}, "Rows" -> {{Baseline}}, 
+        "RowsIndexed" -> {}},
+      GridBoxSpacings->{"Columns" -> {
+          Offset[0.27999999999999997`], {
+           Offset[0.7]}, 
+          Offset[0.27999999999999997`]}, "ColumnsIndexed" -> {}, "Rows" -> {
+          Offset[0.2], {
+           Offset[0.1]}, 
+          Offset[0.2]}, 
+        "RowsIndexed" -> {}}], "\<\"\"\>", "\<\"\"\>", "\<\"\"\>", \
+"\<\"\"\>", "\<\"\"\>", "\<\"\"\>", "\<\"\"\>", "\<\"\"\>"},
+    {"\<\"\"\>", "\<\"\"\>", "\<\"\"\>", "\<\"\"\>", "\<\"\"\>", "\<\"\"\>", \
+"\<\"\"\>", "\<\"\"\>", "\<\"\"\>"}
+   },
+   GridBoxAlignment->{
+    "Columns" -> {{Left}}, "ColumnsIndexed" -> {}, "Rows" -> {{Baseline}}, 
+     "RowsIndexed" -> {}},
+   GridBoxSpacings->{"Columns" -> {
+       Offset[0.27999999999999997`], {
+        Offset[2.0999999999999996`]}, 
+       Offset[0.27999999999999997`]}, "ColumnsIndexed" -> {}, "Rows" -> {
+       Offset[0.2], {
+        Offset[0.4]}, 
+       Offset[0.2]}, "RowsIndexed" -> {}}],
+  TableForm[{{{1, 2}, {1, 3}, {1, 4}, {1, 5}, {1, 6}, {1, 7}, {1, 8}, {1, 
+    9}, {1, 10}}, {{2, 3}, {2, 4}, {2, 5}, {2, 6}, {2, 7}, {2, 8}, {2, 9}, {2,
+     10}}, {{3, 4}, {3, 5}, {3, 6}, {3, 7}, {3, 8}, {3, 9}, {3, 10}}, {{4, 
+    5}, {4, 6}, {4, 7}, {4, 8}, {4, 9}, {4, 10}}, {{5, 6}, {5, 7}, {5, 8}, {5,
+     9}, {5, 10}}, {{6, 7}, {6, 8}, {6, 9}, {6, 10}}, {{7, 8}, {7, 9}, {7, 
+    10}}, {{8, 9}, {8, 10}}, {{9, 10}}, {}}]]], "Output",
+ CellChangeTimes->{3.6394942809065857`*^9, 3.639494336594859*^9}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{"distMat", "=", 
+   RowBox[{"Table", "[", 
+    RowBox[{
+     RowBox[{"Dist", "[", 
+      RowBox[{"i", ",", "j"}], "]"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"i", ",", "1", ",", "Nsz"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"j", ",", 
+       RowBox[{"i", "+", "1"}], ",", "Nsz"}], "}"}]}], "]"}]}], 
+  ";"}], "\[IndentingNewLine]", 
+ RowBox[{"distMat", "//", "MatrixForm"}], "\[IndentingNewLine]", 
+ RowBox[{"Export", "[", 
+  RowBox[{
+  "\"\</home/hugheyst/Dropbox/SS15/PHY905/traveling_salesman/distMatrix.mat\>\
+\"", ",", "distMat", ",", "\"\<Table\>\""}], "]"}]}], "Input",
+ CellChangeTimes->{{3.638276404249544*^9, 3.6382764105755587`*^9}, {
+  3.638276460399362*^9, 3.638276486399891*^9}, {3.638276701685142*^9, 
+  3.638276706413089*^9}, {3.6382768631906*^9, 3.638276882147105*^9}, {
+  3.638806195762228*^9, 3.638806217087757*^9}, {3.638806975666733*^9, 
+  3.638807011385507*^9}, {3.6388076255818167`*^9, 3.638807637721176*^9}}],
+
+Cell[BoxData[
+ TagBox[
+  RowBox[{"(", "\[NoBreak]", 
+   TagBox[GridBox[{
+      {
+       RowBox[{"{", 
+        RowBox[{
+        "4493565", ",", "1279642", ",", "2628996", ",", "157268", ",", 
+         "3941903", ",", "2946776", ",", "4448214", ",", "2494680", ",", 
+         "4741393", ",", "1146106", ",", "1506151", ",", "4689112", ",", 
+         "2809825", ",", "867731", ",", "2553557", ",", "1019547", ",", 
+         "1001952", ",", "3522266", ",", "1768022", ",", "1431070", ",", 
+         "306809", ",", "348951", ",", "4600499", ",", "367113", ",", 
+         "2872561", ",", "1431462", ",", "4667076", ",", "4084290", ",", 
+         "2337769", ",", "3211188", ",", "3858393", ",", "4681006", ",", 
+         "4547909", ",", "4493926", ",", "1923671", ",", "3866027", ",", 
+         "596611", ",", "1399379", ",", "2860096"}], "}"}]},
+      {
+       RowBox[{"{", 
+        RowBox[{
+        "3270815", ",", "2504543", ",", "4378677", ",", "626090", ",", 
+         "2186614", ",", "198972", ",", "2332506", ",", "536792", ",", 
+         "3347922", ",", "3906872", ",", "614507", ",", "2235019", ",", 
+         "3628958", ",", "2285174", ",", "3911801", ",", "3683629", ",", 
+         "1311252", ",", "2914342", ",", "3245380", ",", "4276833", ",", 
+         "4822703", ",", "1827775", ",", "4320922", ",", "1669386", ",", 
+         "3327607", ",", "1550738", ",", "468756", ",", "2157320", ",", 
+         "1284199", ",", "813531", ",", "356019", ",", "618942", ",", "39781",
+          ",", "2625875", ",", "655561", ",", "4406821", ",", "3514784", ",", 
+         "1762822"}], "}"}]},
+      {
+       RowBox[{"{", 
+        RowBox[{
+        "1753997", ",", "1223204", ",", "2873535", ",", "1923765", ",", 
+         "3335694", ",", "1478821", ",", "3488359", ",", "301976", ",", 
+         "1714358", ",", "3436079", ",", "1792323", ",", "581494", ",", 
+         "1583930", ",", "1228013", ",", "450582", ",", "2374258", ",", 
+         "871039", ",", "763476", ",", "1135540", ",", "1587681", ",", 
+         "3332800", ",", "1136490", ",", "1619527", ",", "163763", ",", 
+         "3414043", ",", "2831257", ",", "1269400", ",", "2142819", ",", 
+         "2790024", ",", "3454481", ",", "3294875", ",", "3267401", ",", 
+         "811423", ",", "2797658", ",", "1455059", ",", "1156556", ",", 
+         "1733015"}], "}"}]},
+      {
+       RowBox[{"{", 
+        RowBox[{
+        "2497230", ",", "1899539", ",", "318426", ",", "2355668", ",", 
+         "385128", ",", "3018355", ",", "1642188", ",", "1403179", ",", 
+         "3096070", ",", "271352", ",", "1869146", ",", "425785", ",", 
+         "1672975", ",", "2104874", ",", "1195860", ",", "930669", ",", 
+         "1261707", ",", "2331240", ",", "2979823", ",", "3726175", ",", 
+         "2275965", ",", "1628578", ",", "1899447", ",", "3602673", ",", 
+         "2377810", ",", "716066", ",", "1420120", ",", "1689972", ",", 
+         "2837582", ",", "3100504", ",", "2485916", ",", "1199039", ",", 
+         "1801678", ",", "2258807", ",", "1283480", ",", "1545377"}], "}"}]},
+      {
+       RowBox[{"{", 
+        RowBox[{
+        "3827704", ",", "2814941", ",", "4334015", ",", "2362845", ",", 
+         "4681458", ",", "1031907", ",", "1366428", ",", "4629177", ",", 
+         "2677989", ",", "753532", ",", "2421722", ",", "879824", ",", 
+         "942017", ",", "3390430", ",", "1636186", ",", "1299235", ",", 
+         "167087", ",", "496019", ",", "4540564", ",", "227391", ",", 
+         "2765811", ",", "1371527", ",", "4607142", ",", "3993414", ",", 
+         "2223570", ",", "3096989", ",", "3744194", ",", "4566807", ",", 
+         "4487974", ",", "4379727", ",", "1809472", ",", "3751828", ",", 
+         "456889", ",", "1259657", ",", "2745898"}], "}"}]},
+      {
+       RowBox[{"{", 
+        RowBox[{
+        "1585920", ",", "579855", ",", "1731812", ",", "1145378", ",", 
+         "2796100", ",", "3306178", ",", "1223093", ",", "1634325", ",", 
+         "3077136", ",", "1684480", ",", "3379312", ",", "3258786", ",", 
+         "710559", ",", "2362520", ",", "2693558", ",", "3725011", ",", 
+         "4323720", ",", "2277408", ",", "3769100", ",", "1320993", ",", 
+         "3013436", ",", "2159324", ",", "482778", ",", "1605498", ",", 
+         "732376", ",", "212838", ",", "964605", ",", "1227528", ",", 
+         "612939", ",", "2007062", ",", "54867", ",", "3854998", ",", 
+         "2982295", ",", "1342092"}], "}"}]},
+      {
+       RowBox[{"{", 
+        RowBox[{
+        "2043675", ",", "446968", ",", "2706362", ",", "1891589", ",", 
+         "1720732", ",", "2784077", ",", "139427", ",", "2118547", ",", 
+         "438780", ",", "1990528", ",", "2354275", ",", "883867", ",", 
+         "1180070", ",", "1511108", ",", "2648792", ",", "3297375", ",", 
+         "3446851", ",", "2593518", ",", "1503007", ",", "2065351", ",", 
+         "3323349", ",", "2065817", ",", "754205", ",", "1140796", ",", 
+         "1377979", ",", "2525588", ",", "2788511", ",", "2173923", ",", 
+         "1318565", ",", "1489685", ",", "2576360", ",", "1601033", ",", 
+         "1383842"}], "}"}]},
+      {
+       RowBox[{"{", 
+        RowBox[{
+        "2188391", ",", "721864", ",", "3300181", ",", "3762757", ",", 
+         "799579", ",", "2090905", ",", "3581218", ",", "2141059", ",", 
+         "3835891", ",", "3751118", ",", "1167138", ",", "2920520", ",", 
+         "3251557", ",", "4229093", ",", "4827801", ",", "2012847", ",", 
+         "4327099", ",", "1736875", ",", "3395096", ",", "1735810", ",", 
+         "536245", ",", "2109579", ",", "1236458", ",", "669417", ",", 
+         "541091", ",", "804013", ",", "160000", ",", "2511144", ",", 
+         "589095", ",", "4381308", ",", "3438874", ",", "1830310"}], "}"}]},
+      {
+       RowBox[{"{", 
+        RowBox[{
+        "2715299", ",", "1445558", ",", "1592339", ",", "2793013", ",", 
+         "315503", ",", "1672515", ",", "60349", ",", "1648445", ",", 
+         "1908244", ",", "1029057", ",", "734039", ",", "1065077", ",", 
+         "2195893", ",", "2844476", ",", "3353794", ",", "2140618", ",", 
+         "1256198", ",", "1624267", ",", "3230293", ",", "1981866", ",", 
+         "336744", ",", "1047739", ",", "1523169", ",", "2517558", ",", 
+         "2779338", ",", "2319113", ",", "819670", ",", "1634875", ",", 
+         "2193862", ",", "1251429", ",", "1172996"}], "}"}]},
+      {
+       RowBox[{"{", 
+        RowBox[{
+        "3713285", ",", "4426177", ",", "87421", ",", "2754324", ",", 
+         "3992803", ",", "2667657", ",", "4296637", ",", "3904894", ",", 
+         "1830558", ",", "3299178", ",", "3630216", ",", "4591828", ",", 
+         "5043969", ",", "1355632", ",", "4592778", ",", "2054223", ",", 
+         "3548873", ",", "1078595", ",", "853593", ",", "2542156", ",", 
+         "1669035", ",", "1332836", ",", "230423", ",", "196779", ",", 
+         "572868", ",", "2959071", ",", "1174866", ",", "4791657", ",", 
+         "3899621", ",", "2147658"}], "}"}]},
+      {
+       RowBox[{"{", 
+        RowBox[{
+        "1415890", ",", "3657638", ",", "1764423", ",", "282882", ",", 
+         "1508156", ",", "929401", ",", "456832", ",", "2300178", ",", 
+         "762388", ",", "465008", ",", "930757", ",", "1529466", ",", 
+         "3618776", ",", "931707", ",", "1737561", ",", "455025", ",", 
+         "3635602", ",", "2965163", ",", "1195320", ",", "2068738", ",", 
+         "2715944", ",", "3538557", ",", "3516435", ",", "3351477", ",", 
+         "781222", ",", "2723578", ",", "1184197", ",", "858088", ",", 
+         "1717647"}], "}"}]},
+      {
+       RowBox[{"{", 
+        RowBox[{
+        "4498399", ",", "1673681", ",", "1299592", ",", "1656483", ",", 
+         "618308", ",", "1630020", ",", "2598190", ",", "1157389", ",", 
+         "956762", ",", "1200673", ",", "1843783", ",", "4800454", ",", 
+         "1136707", ",", "2801176", ",", "1870690", ",", "4729370", ",", 
+         "3573284", ",", "1920536", ",", "2639157", ",", "3092302", ",", 
+         "4108976", ",", "4502834", ",", "3888245", ",", "1844837", ",", 
+         "3204007", ",", "1017287", ",", "560512", ",", "2781262"}], "}"}]},
+      {
+       RowBox[{"{", 
+        RowBox[{
+        "2832691", ",", "3940966", ",", "2746023", ",", "4375004", ",", 
+         "3853057", ",", "1908924", ",", "3377545", ",", "3708582", ",", 
+         "4539991", ",", "4992131", ",", "1303795", ",", "4540941", ",", 
+         "2017671", ",", "3497036", ",", "1026758", ",", "931959", ",", 
+         "2620522", ",", "1747401", ",", "1411203", ",", "299700", ",", 
+         "144942", ",", "651234", ",", "2907234", ",", "1253232", ",", 
+         "4800773", ",", "3977987", ",", "2127022"}], "}"}]},
+      {
+       RowBox[{"{", 
+        RowBox[{
+        "1986907", ",", "307140", ",", "1885438", ",", "2222635", ",", 
+         "932608", ",", "1048431", ",", "1379468", ",", "2510285", ",", 
+         "3158868", ",", "3418866", ",", "2455010", ",", "1480295", ",", 
+         "1933711", ",", "3295364", ",", "2046938", ",", "622566", ",", 
+         "1112811", ",", "1426720", ",", "2574329", ",", "2837252", ",", 
+         "2222663", ",", "1186925", ",", "1538426", ",", "2430855", ",", 
+         "1488422", ",", "1361130"}], "}"}]},
+      {
+       RowBox[{"{", 
+        RowBox[{
+        "1735157", ",", "694277", ",", "332490", ",", "2579941", ",", 
+         "949622", ",", "614564", ",", "654310", ",", "1246584", ",", 
+         "3900192", ",", "655259", ",", "2017324", ",", "736441", ",", 
+         "3921892", ",", "3244927", ",", "1475083", ",", "2348502", ",", 
+         "2995707", ",", "3818320", ",", "3802724", ",", "3631240", ",", 
+         "1060985", ",", "3003341", ",", "949073", ",", "916257", ",", 
+         "1997410"}], "}"}]},
+      {
+       RowBox[{"{", 
+        RowBox[{
+        "1712356", ",", "1967551", ",", "977563", ",", "793346", ",", 
+         "1124384", ",", "2255200", ",", "2903783", ",", "3306621", ",", 
+         "2199926", ",", "1209025", ",", "1725450", ",", "3183120", ",", 
+         "1934693", ",", "321657", ",", "1000567", ",", "1471675", ",", 
+         "2470385", ",", "2732165", ",", "2267618", ",", "886016", ",", 
+         "1583381", ",", "2257773", ",", "1315340", ",", "1125823"}], "}"}]},
+      {
+       RowBox[{"{", 
+        RowBox[{
+        "1018606", ",", "2679264", ",", "998985", ",", "660679", ",", 
+         "709144", ",", "1352255", ",", "4504371", ",", "645178", ",", 
+         "2505093", ",", "1380318", ",", "4433287", ",", "3566873", ",", 
+         "1762132", ",", "2632746", ",", "3173376", ",", "4102565", ",", 
+         "4314119", ",", "3915485", ",", "1548754", ",", "3285081", ",", 
+         "556893", ",", "396905", ",", "2485179"}], "}"}]},
+      {
+       RowBox[{"{", 
+        RowBox[{
+        "2783180", ",", "1198506", ",", "863448", ",", "854713", ",", 
+         "1160755", ",", "3776377", ",", "855663", ",", "2034512", ",", 
+         "612626", ",", "3829028", ",", "3246242", ",", "1678322", ",", 
+         "2551741", ",", "3198946", ",", "3869466", ",", "3709860", ",", 
+         "3682386", ",", "1220344", ",", "3206580", ",", "1174231", ",", 
+         "1165142", ",", "2148000"}], "}"}]},
+      {
+       RowBox[{"{", 
+        RowBox[{
+        "1761489", ",", "2092527", ",", "3223344", ",", "3821476", ",", 
+         "2742825", ",", "3168069", ",", "1021957", ",", "2511191", ",", 
+         "2619324", ",", "1188538", ",", "1103253", ",", "434567", ",", 
+         "500701", ",", "1648310", ",", "1911233", ",", "1296644", ",", 
+         "1504818", ",", "612406", ",", "3222277", ",", "2279844", ",", 
+         "902792"}], "}"}]},
+      {
+       RowBox[{"{", 
+        RowBox[{
+        "334576", ",", "1465393", ",", "2113976", ",", "3691419", ",", 
+         "1410118", ",", "1758826", ",", "1016010", ",", "3620336", ",", 
+         "2565321", ",", "760580", ",", "1631194", ",", "2256021", ",", 
+         "3101012", ",", "3362793", ",", "2913932", ",", "738232", ",", 
+         "2286033", ",", "1496017", ",", "599004", ",", "1738912"}], "}"}]},
+      {
+       RowBox[{"{", 
+        RowBox[{
+        "1132438", ",", "1781021", ",", "3847927", ",", "1077163", ",", 
+         "1848649", ",", "918164", ",", "3776843", ",", "2896124", ",", 
+         "1091383", ",", "1961998", ",", "2586825", ",", "3431816", ",", 
+         "3657675", ",", "3244736", ",", "892310", ",", "2616837", ",", 
+         "1163062", ",", "396371", ",", "1828736"}], "}"}]},
+      {
+       RowBox[{"{", 
+        RowBox[{
+        "645705", ",", "4451661", ",", "61719", ",", "2665059", ",", 
+         "1282624", ",", "4518239", ",", "3892661", ",", "2122818", ",", 
+         "2996237", ",", "3717944", ",", "4466055", ",", "4399071", ",", 
+         "4278975", ",", "1708720", ",", "3651076", ",", "405682", ",", 
+         "1093984", ",", "2645145"}], "}"}]},
+      {
+       RowBox[{"{", 
+        RowBox[{
+        "4904388", ",", "706572", ",", "3176450", ",", "1735351", ",", 
+         "4970965", ",", "4388179", ",", "2719304", ",", "3592723", ",", 
+         "4239928", ",", "5011404", ",", "4851798", ",", "4824324", ",", 
+         "2305206", ",", "4247562", ",", "936070", ",", "1738838", ",", 
+         "3241632"}], "}"}]},
+      {
+       RowBox[{"{", 
+        RowBox[{
+        "4464872", ",", "2107737", ",", "3207178", ",", "281908", ",", 
+         "1813836", ",", "3179615", ",", "2300186", ",", "2475135", ",", 
+         "1485491", ",", "1220459", ",", "1866112", ",", "2957597", ",", 
+         "2317165", ",", "4783441", ",", "4241460", ",", "2217088"}], "}"}]},
+      {
+       RowBox[{"{", 
+        RowBox[{
+        "2664778", ",", "1282343", ",", "4517957", ",", "3892380", ",", 
+         "2166903", ",", "3037517", ",", "3662344", ",", "4507336", ",", 
+         "4398789", ",", "4320256", ",", "1708438", ",", "3692357", ",", 
+         "342176", ",", "1030478", ",", "2644864"}], "}"}]},
+      {
+       RowBox[{"{", 
+        RowBox[{
+        "1678400", ",", "1995293", ",", "1233389", ",", "1078366", ",", 
+         "728414", ",", "1437690", ",", "1856613", ",", "1876125", ",", 
+         "1669533", ",", "961792", ",", "1383254", ",", "2850118", ",", 
+         "2240443", ",", "122162"}], "}"}]},
+      {
+       RowBox[{"{", 
+        RowBox[{
+        "3318904", ",", "2896975", ",", "1404313", ",", "2277732", ",", 
+         "2924937", ",", "3520199", ",", "3360593", ",", "3333119", ",", 
+         "915120", ",", "2932571", ",", "1601984", ",", "1309369", ",", 
+         "1798733"}], "}"}]},
+      {
+       RowBox[{"{", 
+        RowBox[{
+        "1545161", ",", "3068397", ",", "2188967", ",", "2347487", ",", 
+         "1206897", ",", "941865", ",", "1587519", ",", "2886081", ",", 
+         "2189517", ",", "4779621", ",", "4169945", ",", "2105870"}], "}"}]},
+      {
+       RowBox[{"{", 
+        RowBox[{
+        "1808022", ",", "934901", ",", "692803", ",", "654859", ",", "916639",
+          ",", "467779", ",", "2189225", ",", "534832", ",", "4057523", ",", 
+         "3165487", ",", "1326172"}], "}"}]},
+      {
+       RowBox[{"{", 
+        RowBox[{
+        "872692", ",", "1519898", ",", "2342511", ",", "2604291", ",", 
+         "2155431", ",", "571280", ",", "1527532", ",", "2252276", ",", 
+         "1360240", ",", "953941"}], "}"}]},
+      {
+       RowBox[{"{", 
+        RowBox[{
+        "712864", ",", "1471151", ",", "1732931", ",", "1284071", ",", 
+         "1274732", ",", "656172", ",", "3122668", ",", "2230632", ",", 
+         "609802"}], "}"}]},
+      {
+       RowBox[{"{", 
+        RowBox[{
+        "1152118", ",", "1415041", ",", "800453", ",", "1912538", ",", 
+         "207749", ",", "3716907", ",", "2774473", ",", "1320238"}], "}"}]},
+      {
+       RowBox[{"{", 
+        RowBox[{
+        "267756", ",", "392750", ",", "2812937", ",", "994748", ",", 
+         "4593883", ",", "3701847", ",", "1949884"}], "}"}]},
+      {
+       RowBox[{"{", 
+        RowBox[{
+        "655812", ",", "2764972", ",", "1257810", ",", "4658512", ",", 
+         "3963053", ",", "1984761"}], "}"}]},
+      {
+       RowBox[{"{", 
+        RowBox[{
+        "2624395", ",", "642103", ",", "4405341", ",", "3513305", ",", 
+         "1761342"}], "}"}]},
+      {
+       RowBox[{"{", 
+        RowBox[{"1930274", ",", "1894484", ",", "1284809", ",", "942357"}], 
+        "}"}]},
+      {
+       RowBox[{"{", 
+        RowBox[{"3777897", ",", "2887358", ",", "1264991"}], "}"}]},
+      {
+       RowBox[{"{", 
+        RowBox[{"943367", ",", "2829860"}], "}"}]},
+      {
+       RowBox[{"{", "2225896", "}"}]},
+      {
+       RowBox[{"{", "}"}]}
+     },
+     GridBoxAlignment->{
+      "Columns" -> {{Center}}, "ColumnsIndexed" -> {}, "Rows" -> {{Baseline}},
+        "RowsIndexed" -> {}},
+     GridBoxSpacings->{"Columns" -> {
+         Offset[0.27999999999999997`], {
+          Offset[0.5599999999999999]}, 
+         Offset[0.27999999999999997`]}, "ColumnsIndexed" -> {}, "Rows" -> {
+         Offset[0.2], {
+          Offset[0.4]}, 
+         Offset[0.2]}, "RowsIndexed" -> {}}],
+    Column], "\[NoBreak]", ")"}],
+  Function[BoxForm`e$, 
+   MatrixForm[BoxForm`e$]]]], "Output",
+ CellChangeTimes->{
+  3.6388062180473127`*^9, {3.63880694654289*^9, 3.638806963607553*^9}, 
+   3.638807013989183*^9, 3.638807174020685*^9, 3.638807680804656*^9, {
+   3.639493552967106*^9, 3.639493588412722*^9}, 3.639493666130319*^9, 
+   3.639494113230781*^9, 3.639494245698885*^9, 3.639494287801991*^9, 
+   3.639494357085224*^9, 3.6394944708756847`*^9, 3.639501402899358*^9}],
+
+Cell[BoxData["\<\"/home/hugheyst/Dropbox/SS15/PHY905/traveling_salesman/\
+distMatrix.mat\"\>"], "Output",
+ CellChangeTimes->{
+  3.6388062180473127`*^9, {3.63880694654289*^9, 3.638806963607553*^9}, 
+   3.638807013989183*^9, 3.638807174020685*^9, 3.638807680804656*^9, {
+   3.639493552967106*^9, 3.639493588412722*^9}, 3.639493666130319*^9, 
+   3.639494113230781*^9, 3.639494245698885*^9, 3.639494287801991*^9, 
+   3.639494357085224*^9, 3.6394944708756847`*^9, 3.6395014029396067`*^9}]
+}, Open  ]],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"Export", "[", 
+   RowBox[{
+   "\"\</home/hugheyst/Dropbox/SS15/PHY905/traveling_salesman/LatLon.txt\>\"",
+     ",", "LatLon", ",", "\"\<List\>\""}], "]"}], ";"}]], "Input",
+ CellChangeTimes->{{3.638276515740108*^9, 3.6382765371103773`*^9}, {
+   3.6382765712062187`*^9, 3.638276604069685*^9}, 3.6388060591751947`*^9, {
+   3.639513375901737*^9, 3.63951338652953*^9}}]
+},
+WindowSize->{1918, 1028},
+WindowMargins->{{-9, Automatic}, {Automatic, -8}},
+FrontEndVersion->"10.0 for Linux x86 (64-bit) (June 27, 2014)",
+StyleDefinitions->"Default.nb"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[CellGroupData[{
+Cell[580, 22, 6632, 165, 319, "Input"],
+Cell[7215, 189, 1837, 28, 121, "Output"],
+Cell[9055, 219, 4296, 126, 121, "Output"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[13388, 350, 132, 2, 32, "Input"],
+Cell[13523, 354, 22467, 625, 280, "Output"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[36027, 984, 978, 22, 77, "Input"],
+Cell[37008, 1008, 17299, 348, 732, "Output"],
+Cell[54310, 1358, 483, 7, 32, "Output"]
+}, Open  ]],
+Cell[54808, 1368, 400, 8, 89, "Input"]
+}
+]
+*)
+
+(* End of internal cache information *)
